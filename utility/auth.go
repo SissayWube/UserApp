@@ -11,18 +11,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func HashedPassword(password string) string {
+func HashPassword(password string) (string, error) {
 	// Hash password using bcrypt
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return string(hash)
+	return string(hash), nil
 }
 
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
+func CheckPasswordHash(password, hash string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 }
 
 // GenerateAccessToken generates an access token from the given payload
@@ -107,9 +106,8 @@ func Login(login *model.Login) (*model.TokenResponse, error) {
 	}
 
 	// Validate Password
-	if valid := CheckPasswordHash(userCredentials.HashedPassword, login.Password); !valid {
-		err = model.ErrIncorrectPassword
-		return nil, err
+	if err := CheckPasswordHash(login.Password, userCredentials.HashedPassword); err != nil {
+		return nil, model.ErrIncorrectPassword
 	}
 
 	// Issue access token

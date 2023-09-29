@@ -7,12 +7,14 @@ import (
 )
 
 // Create a new user
-func CreateUser(user *model.UserCreate) error {
+func CreateUser(user *model.UserCreate) (*model.User, error) {
 	userToCreate := model.User{
-		Name:    user.Name,
-		Surname: user.Surname,
-		Phone:   user.Phone,
-		Address: user.Address,
+		Name:     user.Name,
+		Username: user.Username,
+		Surname:  user.Surname,
+		Phone:    user.Phone,
+		Address:  user.Address,
+		Status:   model.UserStatusActive,
 	}
 
 	db.Transaction(func(tx *gorm.DB) error {
@@ -31,7 +33,7 @@ func CreateUser(user *model.UserCreate) error {
 		return nil
 	})
 
-	return nil
+	return &userToCreate, nil
 }
 
 // Retrieve a user by ID
@@ -58,7 +60,6 @@ func GetUserByUserName(username string) (*model.User, error) {
 
 	user := &model.User{}
 	if err := db.Where("username = ?", username).First(user).Error; err != nil {
-
 		return &model.User{}, err
 	}
 
@@ -74,4 +75,12 @@ func GetUserCredentials(id uint) (*model.UserCredential, error) {
 	return &userCredential, nil
 }
 
-
+// Get Users retrieves all the users from the database
+func GetUsers() (*[]model.User, error) {
+	var users []model.User
+	err := db.Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+	return &users, nil
+}

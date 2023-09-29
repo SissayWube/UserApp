@@ -22,6 +22,7 @@ func StartServer() {
 	auth := api.Group("/auth")
 
 	users.POST("", CreateUser)
+	users.GET("", GetUsers)
 
 	user := users.Group("/:id")
 
@@ -35,16 +36,18 @@ func StartServer() {
 
 	port, found := os.LookupEnv("PORT")
 	if !found {
-		port = "8080"
+		port = model.DefaultPort
 	}
-	// e.Logger.Fatal(e.StartTLS(":"+port, "./assets/cert.pem", "./assets/privkey.pem"))
 	e.Logger.Fatal(e.Start(":" + port))
 
 }
 
 func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-
+		if c.Request().URL.Path == "/api/auth/login" {
+			// Skip authentication for this route
+			return next(c)
+		}
 		// get access token from request
 		cookie, err := c.Cookie("accesstoken")
 		if err != nil {

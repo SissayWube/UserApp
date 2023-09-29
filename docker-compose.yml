@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  postgresdb:
+    container_name: postgresdb
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: pgpass
+      POSTGRES_DB: userapp
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgresvolume:/var/lib/postgresql/data
+  userapp:
+    container_name: userapp
+    build:
+      dockerfile: ./Dockerfile
+      context: .
+    volumes:
+      - ../app/assets:/app/assets
+    ports:
+      - "8443:1323"
+    restart: always
+
+
+
+volumes:
+  cache:
+    driver: local

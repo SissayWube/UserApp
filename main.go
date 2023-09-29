@@ -14,7 +14,6 @@ func main() {
 		log.Print("Error loading env file")
 	}
 	// Initialize the database
-	// Initialize the database connection during application initialization
 	err = db.InitDB()
 	if err != nil {
 		panic(err)
